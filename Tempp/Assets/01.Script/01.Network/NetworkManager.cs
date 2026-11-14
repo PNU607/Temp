@@ -19,6 +19,8 @@ public class NetworkManager : MonoBehaviour
     
     private NetworkRunner _networkRunner;
     private bool _isConnecting;
+    private bool _isLeaving;
+    private bool _hasConnected;
 
     private void Awake()
     {
@@ -39,6 +41,46 @@ public class NetworkManager : MonoBehaviour
     public void JoinRoom()
     {
         StartSessions(GameMode.Client);
+    }
+
+    /// <summary>
+    /// 방 나가기 버튼
+    /// </summary>
+    public async void LeaveRoom()
+    {
+        if (_isLeaving)
+            return;
+
+        _isLeaving = true;
+
+        try
+        {
+            if (_networkRunner != null && _networkRunner.IsRunning)
+            {
+                await _networkRunner.Shutdown();
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+        }
+        finally
+        {
+            Destroy(gameObject);
+            SceneManager.LoadScene("MainScene");
+        }
+    }
+    
+    /// <summary>
+    /// 호스트 탈주로 인한 연결 끊김
+    /// </summary>
+    public void HandleNetworkShutdown(ShutdownReason reason)
+    {
+        if (_isLeaving || !_hasConnected)
+            return;
+
+        Debug.LogWarning($"연결 종료: {reason}");
+        LeaveRoom();
     }
     
     /// <summary>
@@ -93,6 +135,8 @@ public class NetworkManager : MonoBehaviour
 
             if (result.Ok)
             {
+                _hasConnected = true;
+                
                 SetStatus($"Connecting Success! Room Name : {roomName}");
                 Debug.Log($"Photon 연결 성공. {mode}");
             }
