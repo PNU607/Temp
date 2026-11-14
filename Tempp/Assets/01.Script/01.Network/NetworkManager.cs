@@ -3,6 +3,7 @@ using UnityEngine;
 using Fusion;
 using TMPro;
 using System.Threading.Tasks;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 1. 방 생성 요청
@@ -18,6 +19,11 @@ public class NetworkManager : MonoBehaviour
     
     private NetworkRunner _networkRunner;
     private bool _isConnecting;
+
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
 
     /// <summary>
     /// 방 생성 버튼
@@ -51,6 +57,16 @@ public class NetworkManager : MonoBehaviour
             return;
         }
 
+        //GameScene의 빌드 인덱스 찾기
+        int sceneIndex = SceneUtility.GetBuildIndexByScenePath(
+            "Assets/00.Scene/GameScene.unity");
+
+        if (sceneIndex < 0)
+        {
+            SetStatus("No GameScene in Order");
+            return;
+        }
+
         _isConnecting = true;
         SetStatus("Connecting Sever...");
 
@@ -59,11 +75,20 @@ public class NetworkManager : MonoBehaviour
             // NetworkRunner 생성
             _networkRunner = gameObject.AddComponent<NetworkRunner>();
 
+            _networkRunner.ProvideInput = true;
+            
+            var networkSceneManager =
+                gameObject.AddComponent<NetworkSceneManagerDefault>();
+
+            SceneRef gameScene = SceneRef.FromIndex(sceneIndex);
+            
             var result = await _networkRunner.StartGame(new StartGameArgs
             {
                 GameMode = mode,
                 SessionName = roomName,
-                PlayerCount = 4
+                PlayerCount = 4,
+                Scene = gameScene,
+                SceneManager = networkSceneManager,
             });
 
             if (result.Ok)
@@ -110,10 +135,15 @@ public class NetworkManager : MonoBehaviour
         
         Destroy(networkRunner);
         _networkRunner = null;
+
+        var sceneManager = GetComponent<NetworkSceneManagerDefault>();
+
+        if (sceneManager != null)
+            Destroy(sceneManager);
     }
 
     /// <summary>
-    /// Statur 글자 변경 메서드
+    /// Status 글자 변경 메서드
     /// </summary>
     private void SetStatus(string message)
     {
