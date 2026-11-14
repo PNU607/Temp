@@ -3,7 +3,12 @@ using Fusion.Sockets;
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
+
+/// <summary>
+/// 플레이어 소환 스크립트
+/// </summary>
 public class NetworkPlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private NetworkObject _playerPrefab;
@@ -85,7 +90,34 @@ public class NetworkPlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
         Debug.Log($"Spawn Player : {player}");
     }
     
-    public void OnInput(NetworkRunner runner, NetworkInput input) { }
+    public void OnInput(NetworkRunner runner, NetworkInput input)
+    {
+        NetworkInputData data = new NetworkInputData();
+
+        Keyboard keyboard = Keyboard.current;
+
+        if (keyboard == null)
+        {
+            input.Set(data);
+            return;
+        }
+
+        if (keyboard.wKey.isPressed)
+            data.Direction += Vector3.forward;
+
+        if (keyboard.sKey.isPressed)
+            data.Direction += Vector3.back;
+
+        if (keyboard.aKey.isPressed)
+            data.Direction += Vector3.left;
+
+        if (keyboard.dKey.isPressed)
+            data.Direction += Vector3.right;
+
+        data.Direction = data.Direction.normalized;
+
+        input.Set(data);
+    }
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
     public void OnShutdown(NetworkRunner runner, ShutdownReason reason) { }
     public void OnConnectedToServer(NetworkRunner runner) { }
