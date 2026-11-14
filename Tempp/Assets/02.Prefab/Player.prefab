@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6941499013406179681}
   - component: {fileID: 2410180488853173661}
   - component: {fileID: 4896263729230123837}
+  - component: {fileID: -7883885123482705929}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -129,6 +130,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 4896263729230123837}
+  - {fileID: -7883885123482705929}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &4896263729230123837
 MonoBehaviour:
@@ -171,3 +173,16 @@ MonoBehaviour:
     MinImpactfulCollisionAlignment: 0.3
     ImpactStartCorrectionTime: 0.1
     ImpactCorrectionTimeComplete: 0.3
+--- !u!114 &-7883885123482705929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4400034040520915619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2aeda521b6fe5746a81ff00e6ec0196, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _moveSpeed: 5
