@@ -102,6 +102,12 @@ public class NetworkPlayer : NetworkBehaviour
         _model.name = character.Model.name;
         _model.transform.localPosition = character.Offset;
         _model.transform.localScale = Vector3.one * 0.65f;
+
+        if (!_model.TryGetComponent<Animator>(out _))
+        {
+            _model.AddComponent<Animator>();
+        }
+
         _runClip = character.RunClip;
         _idleClip = character.IdleClip;
 
