@@ -1,0 +1,197 @@
+using System;
+using UnityEngine;
+using Fusion;
+using TMPro;
+using System.Threading.Tasks;
+using UnityEngine.SceneManagement;
+
+/// <summary>
+/// 1. 방 생성 요청
+/// 2. 방 참가 요청
+/// 3. NetworkRunner 생성과 관리
+/// 4. 네트워크 연결 성공/실패 처리
+/// </summary>
+public class NetworkManager : MonoBehaviour
+{
+    [Header("UI")] 
+    [SerializeField] private TMP_InputField roomNameInputField;
+    [SerializeField] private TextMeshProUGUI statusText;
+    
+    private NetworkRunner _networkRunner;
+    private bool _isConnecting;
+    private bool _isLeaving;
+    private bool _hasConnected;
+
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
+
+    /// <summary>
+    /// 방 생성 버튼
+    /// </summary>
+    public void CreateRoom()
+    {
+        StartSessions(GameMode.Host);
+    }
+
+    /// <summary>
+    /// 방 참가 버튼
+    /// </summary>
+    public void JoinRoom()
+    {
+        StartSessions(GameMode.Client);
+    }
+
+    /// <summary>
+    /// 방 나가기 버튼
+    /// </summary>
+    public async void LeaveRoom()
+    {
+        if (_isLeaving)
+            return;
+
+        _isLeaving = true;
+
+        try
+        {
+            if (_networkRunner != null && _networkRunner.IsRunning)
+            {
+                await _networkRunner.Shutdown();
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+        }
+        finally
+        {
+            Destroy(gameObject);
+            SceneManager.LoadScene("MainScene");
+        }
+    }
+    
+    /// <summary>
+    /// 호스트 탈주로 인한 연결 끊김
+    /// </summary>
+    public void HandleNetworkShutdown(ShutdownReason reason)
+    {
+        if (_isLeaving || !_hasConnected)
+            return;
+
+        Debug.LogWarning($"연결 종료: {reason}");
+        LeaveRoom();
+    }
+    
+    /// <summary>
+    /// 방 생성과 연결 / 네트워크 연결
+    /// </summary>
+    private async void StartSessions(GameMode mode)
+    {
+        if (_isConnecting || _networkRunner != null)
+            return;
+
+        string roomName = roomNameInputField.text.Trim();
+
+        if (string.IsNullOrEmpty(roomName))
+        {
+            SetStatus("Input Room name");
+            return;
+        }
+
+        //GameScene의 빌드 인덱스 찾기
+        int sceneIndex = SceneUtility.GetBuildIndexByScenePath(
+            "Assets/00.Scene/GameScene.unity");
+
+        if (sceneIndex < 0)
+        {
+            SetStatus("No GameScene in Order");
+            return;
+        }
+
+        _isConnecting = true;
+        SetStatus("Connecting Sever...");
+
+        try
+        {
+            // NetworkRunner 생성
+            _networkRunner = gameObject.AddComponent<NetworkRunner>();
+
+            _networkRunner.ProvideInput = true;
+            
+            var networkSceneManager =
+                gameObject.AddComponent<NetworkSceneManagerDefault>();
+
+            SceneRef gameScene = SceneRef.FromIndex(sceneIndex);
+            
+            var result = await _networkRunner.StartGame(new StartGameArgs
+            {
+                GameMode = mode,
+                SessionName = roomName,
+                PlayerCount = 4,
+                Scene = gameScene,
+                SceneManager = networkSceneManager,
+            });
+
+            if (result.Ok)
+            {
+                _hasConnected = true;
+                
+                SetStatus($"Connecting Success! Room Name : {roomName}");
+                Debug.Log($"Photon 연결 성공. {mode}");
+            }
+
+            else
+            {
+                SetStatus($"Connecting Fail! Room Name : {roomName}");
+                Debug.LogWarning("Connecting Fail");
+
+                await CleanupRunner();
+            }
+        }
+
+        catch (Exception e)
+        {
+            SetStatus("Connecting Fail While Loading");
+            Debug.LogException(e);
+
+            await CleanupRunner();
+        }
+
+        finally
+        {
+            _isConnecting = false;
+        }
+    }
+
+    /// <summary>
+    /// 네트워크 끊기
+    /// </summary>
+    private async Task CleanupRunner()
+    {
+        if (_networkRunner == null)
+            return;
+        
+        NetworkRunner networkRunner = _networkRunner;
+
+        if (networkRunner.IsRunning)
+            await networkRunner.Shutdown();
+        
+        Destroy(networkRunner);
+        _networkRunner = null;
+
+        var sceneManager = GetComponent<NetworkSceneManagerDefault>();
+
+        if (sceneManager != null)
+            Destroy(sceneManager);
+    }
+
+    /// <summary>
+    /// Status 글자 변경 메서드
+    /// </summary>
+    private void SetStatus(string message)
+    {
+        if (statusText != null)
+            statusText.text = message;
+    }
+}
