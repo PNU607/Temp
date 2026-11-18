@@ -9,8 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1638850491464675563}
-  - component: {fileID: 8856788942681123394}
-  - component: {fileID: 6857029612965170620}
   - component: {fileID: 6941499013406179681}
   - component: {fileID: 2410180488853173661}
   - component: {fileID: 4896263729230123837}
@@ -38,59 +36,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &8856788942681123394
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4400034040520915619}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &6857029612965170620
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4400034040520915619}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!135 &6941499013406179681
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -188,6 +133,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _moveSpeed: 5
+  _IsRunning:
+    RawValue: 0
+  _RunStartTick: 0
 --- !u!114 &7900294884292959562
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,7 +145,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 4400034040520915619}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b07e2aa82994e9499545003099fc01e, type: 3}
+  m_Script: {fileID: 11500000, guid: 731c144c6436dfd4a9a5fc64f3b7ff19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _renderer: {fileID: 6857029612965170620}
+  _movement: {fileID: -7883885123482705929}
+  _characters:
+  - Model: {fileID: 919132149155446097, guid: 750a932f36bfcea438001b67c3155f25, type: 3}
+    RunClip: {fileID: 5522812681064789136, guid: 750a932f36bfcea438001b67c3155f25, type: 3}
+    IdleClip: {fileID: -3100369314251171874, guid: 750a932f36bfcea438001b67c3155f25, type: 3}
+    Offset: {x: -2.8275, y: -0.487, z: 0}
+  - Model: {fileID: 919132149155446097, guid: 872c16a1cf25d494fa81ec30b55e4e39, type: 3}
+    RunClip: {fileID: 5522812681064789136, guid: 872c16a1cf25d494fa81ec30b55e4e39, type: 3}
+    IdleClip: {fileID: -3100369314251171874, guid: 872c16a1cf25d494fa81ec30b55e4e39, type: 3}
+    Offset: {x: -0.9425, y: -0.4935, z: 0}
+  - Model: {fileID: 919132149155446097, guid: cb379ba5568135e4db5b38b46fbb6003, type: 3}
+    RunClip: {fileID: 5522812681064789136, guid: cb379ba5568135e4db5b38b46fbb6003, type: 3}
+    IdleClip: {fileID: -3100369314251171874, guid: cb379ba5568135e4db5b38b46fbb6003, type: 3}
+    Offset: {x: 0.9425, y: -0.4675, z: 0}
+  - Model: {fileID: 919132149155446097, guid: 44c6cdc732d300c4286db4f123fa999b, type: 3}
+    RunClip: {fileID: 5522812681064789136, guid: 44c6cdc732d300c4286db4f123fa999b, type: 3}
+    IdleClip: {fileID: -3100369314251171874, guid: 44c6cdc732d300c4286db4f123fa999b, type: 3}
+    Offset: {x: 2.8275, y: -0.5, z: 0}

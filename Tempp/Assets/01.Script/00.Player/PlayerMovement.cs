@@ -1,20 +1,29 @@
 using Fusion;
 using UnityEngine;
 
-/// <summary>
-/// 플레이어 움직임 스크립트
-/// </summary>
 public class PlayerMovement : NetworkBehaviour
 {
     [SerializeField] private float _moveSpeed = 5f;
 
+    [Networked] public NetworkBool IsRunning { get; private set; }
+    [Networked] public int RunStartTick { get; private set; }
+
     public override void FixedUpdateNetwork()
     {
-        if (GetInput(out NetworkInputData data))
+        if (!GetInput(out NetworkInputData data) || data.Direction.sqrMagnitude == 0f)
         {
-            Vector3 direction = data.Direction.normalized;
-            
-            transform.position += direction * _moveSpeed * Runner.DeltaTime;
+            IsRunning = false;
+            return;
         }
+
+        if (!IsRunning)
+        {
+            RunStartTick = Runner.Tick;
+            IsRunning = true;
+        }
+
+        Vector3 direction = data.Direction.normalized;
+        transform.position += direction * _moveSpeed * Runner.DeltaTime;
+        transform.rotation = Quaternion.LookRotation(direction);
     }
 }
