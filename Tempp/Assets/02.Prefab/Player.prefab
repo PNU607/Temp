@@ -150,6 +150,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _movement: {fileID: -7883885123482705929}
   _characters:
+  - Model: {fileID: 919132149155446097, guid: 44c6cdc732d300c4286db4f123fa999b, type: 3}
+    RunClip: {fileID: 5522812681064789136, guid: 44c6cdc732d300c4286db4f123fa999b, type: 3}
+    IdleClip: {fileID: -3100369314251171874, guid: 44c6cdc732d300c4286db4f123fa999b, type: 3}
+    Offset: {x: 2.8275, y: -0.5, z: 0}
   - Model: {fileID: 919132149155446097, guid: 750a932f36bfcea438001b67c3155f25, type: 3}
     RunClip: {fileID: 5522812681064789136, guid: 750a932f36bfcea438001b67c3155f25, type: 3}
     IdleClip: {fileID: -3100369314251171874, guid: 750a932f36bfcea438001b67c3155f25, type: 3}
@@ -162,7 +166,3 @@ MonoBehaviour:
     RunClip: {fileID: 5522812681064789136, guid: cb379ba5568135e4db5b38b46fbb6003, type: 3}
     IdleClip: {fileID: -3100369314251171874, guid: cb379ba5568135e4db5b38b46fbb6003, type: 3}
     Offset: {x: 0.9425, y: -0.4675, z: 0}
-  - Model: {fileID: 919132149155446097, guid: 44c6cdc732d300c4286db4f123fa999b, type: 3}
-    RunClip: {fileID: 5522812681064789136, guid: 44c6cdc732d300c4286db4f123fa999b, type: 3}
-    IdleClip: {fileID: -3100369314251171874, guid: 44c6cdc732d300c4286db4f123fa999b, type: 3}
-    Offset: {x: 2.8275, y: -0.5, z: 0}

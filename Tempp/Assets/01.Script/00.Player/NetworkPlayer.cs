@@ -1,5 +1,7 @@
 using Fusion;
 using UnityEngine;
+using UnityEngine.Animations;
+using UnityEngine.Playables;
 
 public class NetworkPlayer : NetworkBehaviour
 {
@@ -14,15 +16,18 @@ public class NetworkPlayer : NetworkBehaviour
 
     [SerializeField] private PlayerMovement _movement;
     [SerializeField] private Character[] _characters;
+    [SerializeField, Min(1f)] private float _turnSpeed = 720f;
+    [SerializeField, Min(0.01f)] private float _motionBlendDuration = 0.16f;
 
     [Networked] private int CharacterIndex { get; set; }
 
-    private GameObject _model;
-    private AnimationClip _runClip;
-    private AnimationClip _idleClip;
-    private AnimationClip _sampledClip;
+    private Transform _visualRoot;
+    private Quaternion _visualRotation;
+    private PlayableGraph _animationGraph;
+    private AnimationMixerPlayable _motionMixer;
+    private AnimationClipPlayable _runPlayable;
+    private float _runBlend;
     private int _displayedIndex = -1;
-    private float _sampledTime = -1f;
 
     public override void Spawned()
     {
@@ -49,7 +54,7 @@ public class NetworkPlayer : NetworkBehaviour
             }
         }
 
-        Render();
+        ShowCharacter(CharacterIndex);
     }
 
     public override void Render()
@@ -57,34 +62,22 @@ public class NetworkPlayer : NetworkBehaviour
         if (CharacterIndex != _displayedIndex)
         {
             ShowCharacter(CharacterIndex);
-        }
-
-        if (_model == null)
-        {
             return;
         }
 
-        AnimationClip clip;
-        float elapsed;
-        if (_movement.IsRunning)
+        float deltaTime = Time.deltaTime;
+        _visualRotation = Quaternion.RotateTowards(_visualRotation, transform.rotation, _turnSpeed * deltaTime);
+        _visualRoot.rotation = _visualRotation;
+
+        bool isRunning = _movement.IsRunning;
+        if (isRunning && _runBlend == 0f)
         {
-            int elapsedTicks = (int)Runner.Tick - _movement.RunStartTick;
-            clip = _runClip;
-            elapsed = Mathf.Max(0, elapsedTicks) * Runner.DeltaTime;
-        }
-        else
-        {
-            clip = _idleClip;
-            elapsed = (int)Runner.Tick * Runner.DeltaTime + CharacterIndex * 0.27f;
+            SetRunTime();
         }
 
-        float sampleTime = Mathf.Repeat(elapsed, clip.length);
-        if (clip != _sampledClip || sampleTime != _sampledTime)
-        {
-            clip.SampleAnimation(_model, sampleTime);
-            _sampledClip = clip;
-            _sampledTime = sampleTime;
-        }
+        _runBlend = Mathf.MoveTowards(_runBlend, isRunning ? 1f : 0f, deltaTime / _motionBlendDuration);
+        UpdateMotionWeights();
+        _animationGraph.Evaluate(deltaTime);
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)
@@ -98,36 +91,84 @@ public class NetworkPlayer : NetworkBehaviour
         _displayedIndex = index;
 
         Character character = _characters[index];
-        _model = Instantiate(character.Model, transform, false);
-        _model.name = character.Model.name;
-        _model.transform.localPosition = character.Offset;
-        _model.transform.localScale = Vector3.one * 0.65f;
+        _visualRotation = transform.rotation;
+        _visualRoot = new GameObject("Character Visual").transform;
+        _visualRoot.SetParent(transform, false);
 
-        if (!_model.TryGetComponent<Animator>(out _))
+        GameObject model = Instantiate(character.Model, _visualRoot, false);
+        model.name = character.Model.name;
+        model.transform.localPosition = character.Offset;
+        model.transform.localScale = Vector3.one * 0.65f;
+
+        if (!model.TryGetComponent(out Animator animator))
         {
-            _model.AddComponent<Animator>();
+            animator = model.AddComponent<Animator>();
         }
 
-        _runClip = character.RunClip;
-        _idleClip = character.IdleClip;
+        animator.applyRootMotion = false;
+        _animationGraph = PlayableGraph.Create("Player Locomotion");
+        _animationGraph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
+        _motionMixer = AnimationMixerPlayable.Create(_animationGraph, 2);
+
+        AnimationClipPlayable idlePlayable = AnimationClipPlayable.Create(_animationGraph, character.IdleClip);
+        _runPlayable = AnimationClipPlayable.Create(_animationGraph, character.RunClip);
+        _motionMixer.ConnectInput(0, idlePlayable, 0);
+        _motionMixer.ConnectInput(1, _runPlayable, 0);
+
+        AnimationPlayableOutput output = AnimationPlayableOutput.Create(_animationGraph, "Locomotion", animator);
+        output.SetSourcePlayable(_motionMixer);
+
+        idlePlayable.SetTime((int)Runner.Tick * Runner.DeltaTime + index * 0.27f);
+        SetRunTime();
+        _runBlend = _movement.IsRunning ? 1f : 0f;
+        UpdateMotionWeights();
+        _animationGraph.Play();
 
         if (Runner.Config.PeerMode == NetworkProjectConfig.PeerModes.Multiple)
         {
-            Runner.AddVisibilityNodes(_model);
+            Runner.AddVisibilityNodes(model);
         }
+
+        _animationGraph.Evaluate();
+    }
+
+    private void SetRunTime()
+    {
+        int elapsedTicks = (int)Runner.Tick - _movement.RunStartTick;
+        _runPlayable.SetTime(Mathf.Max(0, elapsedTicks) * Runner.DeltaTime);
+    }
+
+    private void UpdateMotionWeights()
+    {
+        float runWeight = Mathf.SmoothStep(0f, 1f, _runBlend);
+        _motionMixer.SetInputWeight(0, 1f - runWeight);
+        _motionMixer.SetInputWeight(1, runWeight);
     }
 
     private void ClearCharacter()
     {
-        if (_model != null)
+        DestroyAnimationGraph();
+
+        if (_visualRoot != null)
         {
-            _model.SetActive(false);
-            Destroy(_model);
+            _visualRoot.gameObject.SetActive(false);
+            Destroy(_visualRoot.gameObject);
         }
 
-        _model = null;
+        _visualRoot = null;
         _displayedIndex = -1;
-        _sampledClip = null;
-        _sampledTime = -1f;
+    }
+
+    private void OnDestroy()
+    {
+        DestroyAnimationGraph();
+    }
+
+    private void DestroyAnimationGraph()
+    {
+        if (_animationGraph.IsValid())
+        {
+            _animationGraph.Destroy();
+        }
     }
 }
