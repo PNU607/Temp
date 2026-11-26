@@ -15,6 +15,7 @@ public class NetworkPlayer : NetworkBehaviour
     }
 
     [Networked] public PlayerRole Role { get; set; }
+    [Networked] private NetworkButtons PreviousButtons { get; set; }
     [SerializeField] private PlayerMovement _movement;
     [SerializeField] private Character[] _characters;
     [SerializeField, Min(1f)] private float _turnSpeed = 720f;
@@ -29,6 +30,28 @@ public class NetworkPlayer : NetworkBehaviour
     private AnimationClipPlayable _runPlayable;
     private float _runBlend;
     private int _displayedIndex = -1;
+
+    public override void FixedUpdateNetwork()
+    {
+        //잡기판정은 호스트가 실행
+        if (!Object.HasStateAuthority)
+            return;
+
+        if (!GetInput(out NetworkInputData input))
+            return;
+        
+        bool catchPressed = input.Buttons.WasPressed(PreviousButtons, InputButton.Catch);
+
+        PreviousButtons = input.Buttons;
+
+        if (Role != PlayerRole.Police || !catchPressed)
+            return;
+
+        if (TryGetComponent(out Police police))
+        {
+            police.TryCatch(Runner);
+        }
+    }
 
     public override void Spawned()
     {

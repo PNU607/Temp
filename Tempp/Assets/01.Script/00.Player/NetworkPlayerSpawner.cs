@@ -121,6 +121,8 @@ public class NetworkPlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
             data.Direction += Vector3.right;
 
         data.Direction = data.Direction.normalized;
+        
+        data.Buttons.Set(InputButton.Catch, keyboard.fKey.isPressed);
 
         input.Set(data);
     }
