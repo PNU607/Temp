@@ -9,11 +9,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1638850491464675563}
-  - component: {fileID: 6941499013406179681}
   - component: {fileID: 2410180488853173661}
-  - component: {fileID: 4896263729230123837}
   - component: {fileID: -7883885123482705929}
   - component: {fileID: 7900294884292959562}
+  - component: {fileID: -1607307954240337924}
+  - component: {fileID: 1585699803297479818}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -36,27 +36,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!135 &6941499013406179681
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4400034040520915619}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &2410180488853173661
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -75,51 +54,10 @@ MonoBehaviour:
   Flags: 262402
   NestedObjects: []
   NetworkedBehaviours:
-  - {fileID: 4896263729230123837}
+  - {fileID: 1585699803297479818}
   - {fileID: -7883885123482705929}
   - {fileID: 7900294884292959562}
   ForceRemoteRenderTimeframe: 0
---- !u!114 &4896263729230123837
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4400034040520915619}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _stateAuthorityChangeErrorCorrectionDelta: 0
-  SyncScale: 0
-  SyncParent: 0
-  _autoAOIOverride: 1
-  ConfigFlags: 0
-  PhysicsSettings:
-    ForecastEnabled: 1
-    DebugPhysics: 0
-    GravityForecast: 2
-    MaxExtrapolationTime: 0.15
-    MinLinearDetectedError: 0.02
-    MinAngularDetectedError: 3
-    DeadzoneVelocityMode: 0
-    MaxLinearError: 0
-    MaxAngularError: 0
-    LowCorrectionProgressThreshold: 0.015
-    HighErrorSimilarityThreshold: 1
-    MaxErrorTotalTime: 0.5
-    MaxRemoteSleepIgnoreTime: 0.5
-    ErrorCorrectionType: 0
-    LinearVelCorrectionMul: 1
-    AngularVelCorrectionMul: 1
-    PositionCorrectionLerp: 0.15
-    RotationCorrectionLerp: 0.15
-    Spring: 75
-    Damper: 2
-    MinImpactfulCollisionAlignment: 0.3
-    ImpactStartCorrectionTime: 0.1
-    ImpactCorrectionTimeComplete: 0.3
 --- !u!114 &-7883885123482705929
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -148,6 +86,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 731c144c6436dfd4a9a5fc64f3b7ff19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _Role: 0
   _movement: {fileID: -7883885123482705929}
   _characters:
   - Model: {fileID: 919132149155446097, guid: 44c6cdc732d300c4286db4f123fa999b, type: 3}
@@ -166,3 +105,49 @@ MonoBehaviour:
     RunClip: {fileID: 5522812681064789136, guid: cb379ba5568135e4db5b38b46fbb6003, type: 3}
     IdleClip: {fileID: -3100369314251171874, guid: cb379ba5568135e4db5b38b46fbb6003, type: 3}
     Offset: {x: 0.9425, y: -0.4675, z: 0}
+  _turnSpeed: 720
+  _motionBlendDuration: 0.16
+--- !u!143 &-1607307954240337924
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4400034040520915619}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &1585699803297479818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4400034040520915619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 378411a89480da345945c2f888327a2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  gravity: 1
+  jumpImpulse: 8
+  acceleration: 10
+  braking: 10
+  maxSpeed: 10
+  rotationSpeed: 15

@@ -1,29 +1,39 @@
+using System;
 using Fusion;
 using UnityEngine;
 
+/// <summary>
+/// 플레이어의 이동 담당 스크립트
+/// </summary>
 public class PlayerMovement : NetworkBehaviour
 {
     [SerializeField] private float _moveSpeed = 5f;
 
     [Networked] public NetworkBool IsRunning { get; private set; }
     [Networked] public int RunStartTick { get; private set; }
+    
+    private NetworkCharacterController _controller;
+
+    private void Awake()
+    {
+        _controller = GetComponent<NetworkCharacterController>();
+    }
 
     public override void FixedUpdateNetwork()
     {
-        if (!GetInput(out NetworkInputData data) || data.Direction.sqrMagnitude == 0f)
-        {
-            IsRunning = false;
-            return;
-        }
-
-        if (!IsRunning)
-        {
+        Vector3 direction = Vector3.zero;
+        
+        if (GetInput(out NetworkInputData input))
+            direction = input.Direction.normalized;
+        
+        bool wantsToRun = direction.sqrMagnitude > 0f;
+        
+        if (wantsToRun && !IsRunning)
             RunStartTick = Runner.Tick;
-            IsRunning = true;
-        }
+        
+        IsRunning = wantsToRun;
 
-        Vector3 direction = data.Direction.normalized;
-        transform.position += direction * _moveSpeed * Runner.DeltaTime;
-        transform.rotation = Quaternion.LookRotation(direction);
+        _controller.Velocity = direction * _controller.maxSpeed;
+        _controller.Move(direction);
     }
 }
