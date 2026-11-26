@@ -81,7 +81,13 @@ public class NetworkPlayerSpawner : MonoBehaviour, INetworkRunnerCallbacks
             (index / 2) * 3f - 1.5f
         );
 
-        NetworkObject obj = runner.Spawn(_playerPrefab, position, Quaternion.identity, player);
+        PlayerRole role = player == runner.LocalPlayer ? PlayerRole.Thief : PlayerRole.Police;
+        NetworkObject obj = runner.Spawn(_playerPrefab, position, Quaternion.identity, player,
+            onBeforeSpawned: (spawnRunner, spawnedObject) =>
+            {
+                NetworkPlayer networkPlayer = spawnedObject.GetComponent<NetworkPlayer>();
+                networkPlayer.Role = role;    
+            });
         
         runner.SetPlayerObject(player, obj);
 

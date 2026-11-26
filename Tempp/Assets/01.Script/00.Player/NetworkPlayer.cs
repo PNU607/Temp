@@ -14,6 +14,7 @@ public class NetworkPlayer : NetworkBehaviour
         public Vector3 Offset;
     }
 
+    [Networked] public PlayerRole Role { get; set; }
     [SerializeField] private PlayerMovement _movement;
     [SerializeField] private Character[] _characters;
     [SerializeField, Min(1f)] private float _turnSpeed = 720f;
@@ -55,6 +56,7 @@ public class NetworkPlayer : NetworkBehaviour
         }
 
         ShowCharacter(CharacterIndex);
+        AttachRole();
     }
 
     public override void Render()
@@ -169,6 +171,22 @@ public class NetworkPlayer : NetworkBehaviour
         if (_animationGraph.IsValid())
         {
             _animationGraph.Destroy();
+        }
+    }
+
+    /// <summary>
+    /// 역할에 맞는 스크립트 Prefab에 부여
+    /// </summary>
+    private void AttachRole()
+    {
+        switch (Role)
+        {
+            case PlayerRole.Thief:
+                gameObject.AddComponent<Thief>();
+                break;
+            case PlayerRole.Police:
+                gameObject.AddComponent<Police>();
+                break;
         }
     }
 }
